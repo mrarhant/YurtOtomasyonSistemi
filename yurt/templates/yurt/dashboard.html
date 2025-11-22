@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-menu a {
+            color: #ef4444;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
+        }
+
+        .debt-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #dc2626;
+            margin: 10px 0;
+        }
+
+        .debt-amount.no-debt {
+            color: #059669;
+        }
+
+        .due-date {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .pay-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .pay-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: #6b7280;
+            font-weight: 500;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .new-request-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            max-width: 90%;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Inter';
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1 id="welcome-msg">Merhaba, Öğrenci 👋</h1>
+            <div class="user-menu">
+                <a href="/cikis/">🚪 Çıkış Yap</a>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-column">
+                <div class="card">
+                    <h3 class="card-title">GÜNCEL BORÇ</h3>
+                    <div id="debt-amount" class="debt-amount">Yükleniyor...</div>
+                    <div id="due-date" class="due-date">...</div>
+                    <button id="pay-btn" onclick="modalAc('odeme-modal')" class="pay-btn" disabled>BORÇ ÖDE</button>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title" style="margin-bottom: 20px;">SON ÖDEMELER</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Açıklama</th>
+                                    <th>Tutar</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card" style="min-height: 500px;">
+                    <div class="card-header">
+                        <h3 class="card-title">İZİN HAREKETLERİ</h3>
+                        <button onclick="modalAc('izin-modal')" class="new-request-btn">+ Yeni Talep</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarih Aralığı</th>
+                                    <th>Gün</th>
+                                    <th>Sebep</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="permissions-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="odeme-modal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <span class="close-btn" onclick="modalKapat('odeme-modal')">&times;</span>
+            <h3>💳 Güvenli Ödeme</h3>
+            <p>Kayıtlı kartınız ile ödeme alınacaktır.</p>
+            <div
+                style="background: #eff6ff; padding: 15px; border-radius: 10px; margin: 20px 0; color: #1e40af; font-weight: 600;">
+                **** **** **** 4582 (Bonus)
+            </div>
+            <button onclick="odemeyiTamamla()" class="pay-btn">✅ Ödemeyi Onayla</button>
+        </div>
+    </div>
+
+    <div id="izin-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="modalKapat('izin-modal')">&times;</span>
+            <h3>🏡 Yeni İzin Talebi</h3>
+            <label style="font-size: 14px; color: #6b7280;">Başlangıç Tarihi</label>
+            <input type="date" id="baslangic" class="form-input">
+            <label style="font-size: 14px; color: #6b7280;">Bitiş Tarihi</label>
+            <input type="date" id="bitis" class="form-input">
+            <label style="font-size: 14px; color: #6b7280;">Sebep / Açıklama</label>
+            <input type="text" id="aciklama" placeholder="Örn: Aile ziyareti" class="form-input">
+            <label style="font-size: 14px; color: #6b7280;">Gidilecek Adres (Opsiyonel)</label>
+            <textarea id="adres" rows="2" class="form-input"></textarea>
+            <button onclick="izinGonder()" class="pay-btn">Talebi Gönder</button>
+        </div>
+    </div>
+
+
+    <script>
+        let aktifFaturaId = null;
+
+        fetch('/api/dashboard-data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) { alert("Hata: " + data.error); return; }
+
+
+                document.getElementById('welcome-msg').innerText = `Merhaba, ${data.ad_soyad} 👋`;
+
+                const debtEl = document.getElementById('debt-amount');
+                const dateEl = document.getElementById('due-date');
+                const payBtn = document.getElementById('pay-btn');
+
+                if (data.toplam_borc > 0) {
+
+                    debtEl.innerText = `₺${data.toplam_borc.toFixed(2)}`;
+                    dateEl.innerText = `Son Ödeme Tarihi: ${data.son_odeme_tarihi}`;
+                    payBtn.disabled = false;
+                    aktifFaturaId = data.odenecek_fatura_id;
+                } else {
+
+                    debtEl.innerText = "₺0.00";
+                    debtEl.classList.add('no-debt');
+                    dateEl.innerText = "Ödenmemiş borcunuz bulunmamaktadır. 🎉";
+                    payBtn.disabled = true;
+                }
+
+                const paymentsTable = document.getElementById('payments-table');
+                data.son_odemeler.forEach(odeme => {
+                    paymentsTable.innerHTML += `
+                    <tr>
+                        <td>${odeme.tarih}</td>
+                        <td>${odeme.aciklama}</td>
+                        <td>₺${odeme.tutar}</td>
+                        <td><span class="badge badge-success">Başarılı</span></td>
+                    </tr>
+                `;
+                });
+                if (data.son_odemeler.length === 0) paymentsTable.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9ca3af;">Henüz ödeme geçmişi yok.</td></tr>';
+
+                const permissionsTable = document.getElementById('permissions-table');
+                data.izinler.forEach(izin => {
+                    let badgeClass = 'badge-warning';
+                    let durumYazi = 'Bekliyor';
+                    if (izin.durum === 'onaylandi') { badgeClass = 'badge-success'; durumYazi = 'Onaylandı'; }
+                    if (izin.durum === 'reddedildi') { badgeClass = 'badge-danger'; durumYazi = 'Reddedildi'; }
+
+                    permissionsTable.innerHTML += `
+                    <tr>
+                        <td>${izin.aralik}</td>
+                        <td style="text-align:center">${izin.gun}</td>
+                        <td>${izin.sebep}</td>
+                        <td><span class="badge ${badgeClass}">${durumYazi}</span></td>
+                    </tr>
+                `;
+                });
+                if (data.izinler.length === 0) permissionsTable.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9ca3af;">Henüz izin talebiniz yok.</td></tr>';
+            });
+
+        function modalAc(id) { document.getElementById(id).style.display = 'flex'; }
+        function modalKapat(id) { document.getElementById(id).style.display = 'none'; }
+
+        function odemeyiTamamla() {
+            fetch('/api/odeme-yap/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fatura_id: aktifFaturaId })
+            }).then(r => r.json()).then(d => { alert(d.mesaj); location.reload(); });
+        }
+
+        function izinGonder() {
+            fetch('/api/izin-iste/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    baslangic: document.getElementById('baslangic').value,
+                    bitis: document.getElementById('bitis').value,
+                    aciklama: document.getElementById('aciklama').value,
+                    adres: document.getElementById('adres').value
+                })
+            }).then(r => r.json()).then(d => { alert(d.mesaj); location.reload(); });
+        }
+    </script>
+</body>
+
+</html>

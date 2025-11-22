@@ -1,0 +1,10 @@
+# Django çöp dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Veritabanı (Bunu yüklemek güvenlik riskidir, her bilgisayarda yeniden oluşmalı)
+db.sqlite3
+
+# VS Code ayarları
+.vscode/
